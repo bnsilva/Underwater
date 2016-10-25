@@ -12,21 +12,26 @@ namespace Underwater
 		GraphicsDeviceManager graphics;
 		ContentManager content;
 		Fish[] fishes;
-		int fishNumber, cont;
+		FishBackground[] fishesBackground;
+		Color color;
+		int fishNumber, cont, depth;
 
 		#endregion
 
-		public EnemyManager(GraphicsDeviceManager graphics, ContentManager content)
+		public EnemyManager(GraphicsDeviceManager graphics, ContentManager content, int depth, int fishNumber, Color color)
 		{
 			this.content = content;
 			this.graphics = graphics;
+			this.depth = depth;
+			this.fishNumber = fishNumber;
+			this.color = color;
 		}
 
 		public void initialize()
 		{
-			fishNumber = 20;
 			cont = 0;
 			fishes = new Fish[fishNumber];
+			fishesBackground = new FishBackground[fishNumber];
 		}
 
 		public void loadContent()
@@ -36,22 +41,37 @@ namespace Underwater
 
 		public void update()
 		{
-
+			#region load fish lists
 			if (cont < fishNumber)
 			{
-				fishes[cont] = new Fish(graphics, content);
+				fishes[cont] = new Fish(graphics, content, depth, color,depth, -1);
 				fishes[cont].initialize();
 				fishes[cont].loadContent();
+
+				fishesBackground[cont] = new FishBackground(graphics, content);
+				fishesBackground[cont].initialize();
+				fishesBackground[cont].loadContent();
+
 				cont++;
 			}
+			#endregion
 
 			foreach (Fish fish in fishes)
 				if(fish != null)
+					fish.update();
+
+			foreach (FishBackground fish in fishesBackground)
+				if (fish != null)
 					fish.update();
 		}
 
 		public void draw(SpriteBatch spriteBatch)
 		{
+
+			foreach (FishBackground fish in fishesBackground)
+				if (fish != null)
+					fish.draw(spriteBatch);
+			
 			foreach (Fish fish in fishes)
 				if(fish != null)
 					fish.draw(spriteBatch);

@@ -13,19 +13,24 @@ namespace Underwater
 		GraphicsDeviceManager graphics;
 		ContentManager content;
 		SpriteManager spriteManager;
-		Texture2D texture;
-		Vector2 position;
+		protected Color color;
+		protected Texture2D texture;
+		protected Vector2 position;
 		Rectangle sourceRectangle;
 		Random random;
 		float speed, rotation, scale, layerDepth;
-		int spriteNumber, spriteTime, minimumSprite, ySourceRectangle;
+		int spriteNumber, spriteTime, minimumSprite, ySourceRectangle, type, depth;
 
 		#endregion
 
-		public Fish(GraphicsDeviceManager graphics, ContentManager content)
+		public Fish(GraphicsDeviceManager graphics, ContentManager content, int type, Color color,int depth, int layerDepth)
 		{
 			this.graphics = graphics;
 			this.content = content;
+			this.type = type-1;
+			this.color = color;
+			this.depth = depth;
+			this.layerDepth = layerDepth;
 		}
 
 		public void initialize()
@@ -41,7 +46,7 @@ namespace Underwater
 			#region random variables
 
 			random = new Random();
-			minimumSprite = random.Next(4) * 3;
+			minimumSprite = type * 3;
 			speed = random.Next(-3, 3) * 0.2f;
 			scale = random.Next(2, 4) * 0.5f;
 
@@ -55,7 +60,7 @@ namespace Underwater
 			#region objects
 			spriteManager = new SpriteManager();
 			sourceRectangle = new Rectangle(32 * minimumSprite, ySourceRectangle, 32, 16);
-			position = new Vector2(random.Next(700), random.Next(500));
+			position = new Vector2(random.Next(graphics.GraphicsDevice.Viewport.Width), random.Next(graphics.GraphicsDevice.Viewport.Height));
 			#endregion
 
 			spriteManager.initialize();
@@ -69,7 +74,7 @@ namespace Underwater
 		public void update()
 		{
 			#region movement limit
-			if (position.X > 800)
+			if (position.X > graphics.GraphicsDevice.Viewport.Width)
 			{
 				sourceRectangle.Y = 40;
 				speed *= -1;
@@ -83,6 +88,7 @@ namespace Underwater
 			#endregion
 
 			position.X += speed;
+			position.Y += (float)Math.Cos(position.X / 10) * .2f;
 		}
 
 		public void draw(SpriteBatch spriteBatch)
@@ -91,7 +97,7 @@ namespace Underwater
 				texture,
 				position,
 				spriteManager.animationSprite(sourceRectangle, spriteNumber, spriteTime),
-				Color.White,
+				color,
 				rotation,
 				Vector2.Zero,
 				scale,

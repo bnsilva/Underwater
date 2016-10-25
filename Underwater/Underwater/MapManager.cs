@@ -9,20 +9,22 @@ namespace Underwater
 		GraphicsDeviceManager graphics;
 		ContentManager content;
 		Player player;
+		Game1 game;
 		Map[] maps;
 
 		int numberOfMaps, depthMap;
 
-		public MapManager(GraphicsDeviceManager graphics, ContentManager content, Player player)
+		public MapManager(Game1 game, GraphicsDeviceManager graphics, ContentManager content, Player player)
 		{
 			this.graphics = graphics;
 			this.content = content;
 			this.player = player;
+			this.game = game;
 		}
 
 		public void initialize()
 		{
-			numberOfMaps = 3;
+			numberOfMaps = 4;
 			depthMap = 0;
 
 			maps = new Map[numberOfMaps];
@@ -45,8 +47,9 @@ namespace Underwater
 		public void update()
 		{
 			mapChanger();
-
+			checkStatusPlayer();
 			maps[depthMap].update();
+
 		}
 
 		public void draw(SpriteBatch spriteBatch) 
@@ -60,20 +63,12 @@ namespace Underwater
 			{
 				if (depthMap != maps.Length - 1)
 				{
-					if (player.getLevel() > depthMap)
-					{
-						depthMap++;
-						player.resetPosition(player.getPosition().X, 0);
-						Map.mapChangedDown = false;
-					}
-					else
-					{
-						player.resetPosition(player.getPosition().X, graphics.GraphicsDevice.Viewport.Height);
-						Map.mapChangedDown = false;
-					}
+					depthMap++;
+					player.resetPosition(player.getPosition().X, 0);
+					Map.mapChangedDown = false;
 				}
 				else {
-					player.resetPosition(player.getPosition().X, graphics.GraphicsDevice.Viewport.Height);
+					player.resetPosition(player.getPosition().X, graphics.GraphicsDevice.Viewport.Height - 14);
 					Map.mapChangedDown = false;
 				}
 			}
@@ -83,7 +78,7 @@ namespace Underwater
 				if (depthMap != 0)
 				{
 					depthMap--;
-					player.resetPosition(player.getPosition().X, graphics.GraphicsDevice.Viewport.Height);
+					player.resetPosition(player.getPosition().X, graphics.GraphicsDevice.Viewport.Height - 15);
 					Map.mapChangedUp = false;
 				}
 				else {
@@ -91,6 +86,32 @@ namespace Underwater
 					Map.mapChangedUp = false;
 				}
 			}
+		}
+
+		public Map getMap()
+		{
+			return maps[depthMap];
+		}
+
+		public void checkStatusPlayer()
+		{
+			if (player.getLevel().X > maps[depthMap].getStatus().X ||
+				player.getLevel().Y < maps[depthMap].getStatus().Y)
+			{
+				player.receiveDamage();
+			}
+			else
+				player.receiveHealing();
+
+			if (player.getLife() == 0)
+			{
+				gameOver();
+			}
+		}
+
+		public void gameOver()
+		{
+			game.Exit();
 		}
 	}
 }
